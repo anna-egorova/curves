@@ -28,23 +28,27 @@ class Renderer {
     return array;
   }
   
-  shuffleConstrained(n, minJump = 3) { 
-    const CNTR = 10000;
+  shuffleConstrained(n) { 
+    const CNTR = 50000;
     let cntr = 0;
     let arr = undefined;
     while (cntr < CNTR) {
       arr = [...Array(n).keys()];
       arr = this.shuffleArray(arr);
       let foundUnaccepted = false;
-      for (let i = 1; i < arr.length; ++i) {
-        const prev = arr[i-1];
-        const curr = arr[i];
-        if (Math.abs(curr - prev) < minJump) {
+      for (let i = 2; i < arr.length; ++i) {
+        const prev = arr[i-2];
+        const curr = arr[i-1];
+        const next = arr[i];
+        if (
+          prev <= curr && curr <= next ||
+          prev >= curr && curr >= next) {
           foundUnaccepted = true;
           break;
         }
       }
       if (!foundUnaccepted) {
+        console.log(cntr);
         return arr;
       }
       cntr++;
