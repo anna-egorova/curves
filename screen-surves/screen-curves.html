@@ -1,0 +1,26 @@
+<!DOCTYPE html> 
+<html> 
+<head>
+  <script src="cubic-spline.js"></script>
+  <script src="screen-curves-drawing.js"></script>
+  <script>
+      var renderer = null;
+  </script>
+</head> 
+
+<body>
+  <canvas id="canvas" width="400" height="200"></canvas>
+	<script>
+    function draw() {
+      renderer.draw();
+      window.requestAnimationFrame(() => window.setTimeout(draw, 10));
+    }
+    renderer = new Renderer();
+    renderer.prepare();
+    draw();
+    
+    
+	</script> 
+</body> 
+
+</html> 
