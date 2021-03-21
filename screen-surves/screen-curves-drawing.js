@@ -27,13 +27,37 @@ class Renderer {
     }
     return array;
   }
+  
+  shuffleConstrained(n, minJump = 3) { 
+    const CNTR = 10000;
+    let cntr = 0;
+    let arr = undefined;
+    while (cntr < CNTR) {
+      arr = [...Array(n).keys()];
+      arr = this.shuffleArray(arr);
+      let foundUnaccepted = false;
+      for (let i = 1; i < arr.length; ++i) {
+        const prev = arr[i-1];
+        const curr = arr[i];
+        if (Math.abs(curr - prev) < minJump) {
+          foundUnaccepted = true;
+          break;
+        }
+      }
+      if (!foundUnaccepted) {
+        return arr;
+      }
+      cntr++;
+    }
+    return arr;
+  }
 
   makeSplinePoints(nSegments = 20) {
     const w = this.canvas.width;
     const h = this.canvas.height;
     let pointsX = [],
     pointsY = [];
-    let indicesY = this.shuffleArray([...Array(nSegments + 1).keys()]);
+    let indicesY = this.shuffleConstrained(nSegments + 1);
     for (let i = 0; i <= nSegments; ++i) {
       pointsX.push(i * (w / nSegments));
       pointsY.push(indicesY[i] * (h / nSegments));
