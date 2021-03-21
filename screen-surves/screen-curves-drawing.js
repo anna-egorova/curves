@@ -4,10 +4,11 @@ class Renderer {
     this.canvas = document.getElementById("canvas");
     this.ctx = canvas.getContext("2d");
     this.rand = this.mulberry32(42);
+    this.needToRender = true;
   }
-  
+
   mulberry32(a) {
-    return function() {
+    return function () {
       var t = a += 0x6D2B79F5;
       t = Math.imul(t ^ t >>> 15, t | 1);
       t ^= t + Math.imul(t ^ t >>> 7, t | 61);
@@ -19,13 +20,23 @@ class Renderer {
     return min + Math.floor((max - min) * Math.random());
   }
 
-  makeSplinePoints(nPoints = 10) {
+  shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  makeSplinePoints(nSegments = 20) {
     const w = this.canvas.width;
     const h = this.canvas.height;
-    let pointsX = [], pointsY = [];
-    for (let i = 0; i <= nPoints; ++i) {
-      pointsX.push(i * (w / nPoints));
-      pointsY.push(this.randomInt(0, h-1));
+    let pointsX = [],
+    pointsY = [];
+    let indicesY = this.shuffleArray([...Array(nSegments + 1).keys()]);
+    for (let i = 0; i <= nSegments; ++i) {
+      pointsX.push(i * (w / nSegments));
+      pointsY.push(indicesY[i] * (h / nSegments));
     }
     return [pointsX, pointsY];
   }
@@ -34,10 +45,10 @@ class Renderer {
 
     this.points = [];
     this.currPoint = 1;
-    this.resolution = canvas.width / 5;
+    this.resolution = canvas.width / 3;
     this.lineWidth = 2;
 
-    const [xs, ys] = this.makeSplinePoints();
+    const[xs, ys] = this.makeSplinePoints();
     this.spline = new Spline(xs, ys);
     for (let i = 0; i < this.resolution; i++) {
       const x = i * (this.canvas.width / this.resolution);
@@ -54,18 +65,43 @@ class Renderer {
     let maxY = -1000000;
     for (let i = 0; i < this.points.length; ++i) {
       const y = this.points[i].y;
-      if (y > maxY) { maxY = y; }
-      if (y < minY) { minY = y; }
+      if (y > maxY) {
+        maxY = y;
+      }
+      if (y < minY) {
+        minY = y;
+      }
     }
-    if (maxY < max) { max = maxY; }
-    if (minY > min) { min = minY; }
+    if (maxY < max) {
+      max = maxY;
+    }
+    if (minY > min) {
+      min = minY;
+    }
     for (let i = 0; i < this.points.length; ++i) {
       const y = this.points[i].y;
-      this.points[i].y = min + (max - min)*(y - minY)/(maxY - minY);
+      this.points[i].y = min + (max - min) * (y - minY) / (maxY - minY);
     }
   }
+  
+  resize() {
+    var width = this.canvas.clientWidth;
+    var height = this.canvas.clientHeight;
+    if (this.canvas.width != width ||
+        this.canvas.height != height) {
+       this.canvas.width = width;
+       this.canvas.height = height;
+       return true;
+  }
+  return false;
+}
 
   draw() {
+
+    if (this.resize())
+    {
+      // handle window resize
+    }
     
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.ctx.beginPath();
@@ -84,5 +120,6 @@ class Renderer {
       this.prepare();
     }
   }
+
 
 }
